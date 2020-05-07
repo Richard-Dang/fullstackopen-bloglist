@@ -42,7 +42,6 @@ describe("when there is initially some blogs saved", () => {
 
   test("blogs contains a unique id property", async () => {
     const response = await api.get("/api/blogs");
-    console.log(response.body);
 
     response.body.forEach((blog) => {
       expect(blog.id).toBeDefined();
@@ -99,7 +98,7 @@ describe("addition of a new blog", () => {
 });
 
 describe("deletion of a blog", () => {
-  test.only("succeeds with status code 204 if id is valid", async () => {
+  test("succeeds with status code 204 if id is valid", async () => {
     const blogsBeforeDeletion = await helper.blogsInDb();
     const blogToDelete = blogsBeforeDeletion[0];
 
@@ -111,7 +110,7 @@ describe("deletion of a blog", () => {
 });
 
 describe("modification of a blog", () => {
-  test.only("updates likes with valid data", async () => {
+  test("updates likes with valid data", async () => {
     const blogsBeforeUpdate = await helper.blogsInDb();
     const blogToUpdate = blogsBeforeUpdate[0];
     blogToUpdate.likes = 123;
