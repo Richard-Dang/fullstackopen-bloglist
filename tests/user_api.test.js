@@ -56,6 +56,28 @@ describe("creation of new user", () => {
     const usersAtEnd = await helper.usersInDb();
     expect(usersAtEnd).toHaveLength(usersAtStart.length);
   });
+  test("fails with proper statuscode and message if both username and password are not at least 3 characters long", async () => {
+    const usersAtStart = await helper.usersInDb();
+
+    const newUser = {
+      username: "ab",
+      name: "SuperUser",
+      password: "ab",
+    };
+
+    const result = await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(400)
+      .expect("Content-Type", /application\/json/);
+
+    expect(result.body.error).toContain(
+      "username and password must be at least 3 characters long."
+    );
+
+    const usersAtEnd = await helper.usersInDb();
+    expect(usersAtEnd).toHaveLength(usersAtStart.length);
+  });
 });
 
 afterAll(() => mongoose.connection.close());
