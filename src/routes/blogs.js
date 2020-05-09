@@ -1,6 +1,8 @@
 const blogsRouter = require("express").Router();
 const Blog = require("../models/blog");
 const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+const authenticateUser = require("../middlewares/authenticateUser");
 
 blogsRouter.get("/", async (req, res) => {
   const blogs = await Blog.find({}).populate("user", {
@@ -11,8 +13,9 @@ blogsRouter.get("/", async (req, res) => {
   res.json(blogs);
 });
 
-blogsRouter.post("/", async (req, res) => {
+blogsRouter.post("/", authenticateUser, async (req, res) => {
   const newBlog = req.body;
+  const user = req.user;
 
   if (!newBlog.url && !newBlog.title) {
     return res.status(400).send({ error: "url and title are missing" });
@@ -20,8 +23,6 @@ blogsRouter.post("/", async (req, res) => {
     newBlog.likes = 0;
   }
 
-  // Currently attaches random user to blog
-  const user = await User.findOne();
   newBlog.user = user._id;
 
   const blog = new Blog(newBlog);

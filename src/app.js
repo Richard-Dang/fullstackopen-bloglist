@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const config = require("./utils/config");
 const blogsRouter = require("./routes/blogs");
 const usersRouter = require("./routes/users");
+const loginRouter = require("./routes/login");
 const errorHandler = require("./middlewares/errorHandler");
 
 mongoose
@@ -13,6 +14,7 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
+    useCreateIndex: true,
   })
   .then(() => console.log("Connceted to MongoDB"))
   .catch((err) => console.log("Failed to connect to MongoDB: ", err));
@@ -22,6 +24,7 @@ app.use(express.json());
 
 app.use("/api/blogs", blogsRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/login", loginRouter);
 
 app.use(errorHandler);
 
