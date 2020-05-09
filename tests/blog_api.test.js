@@ -4,6 +4,24 @@ const app = require("../src/app");
 const api = supertest(app);
 const helper = require("./test_helper");
 const Blog = require("../src/models/blog");
+const User = require("../src/models/user");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+
+createUserToken = async () => {
+  await User.deleteMany({});
+
+  const passwordHash = await bcrypt.hash("secret", 10);
+  const user = new User({ username: "root", passwordHash });
+  await user.save();
+
+  const userForToken = {
+    username: user.username,
+    id: user._id,
+  };
+
+  return jwt.sign(userForToken, process.env.SECRET);
+};
 
 beforeEach(async () => {
   await Blog.deleteMany({});
@@ -50,6 +68,22 @@ describe("when there is initially some blogs saved", () => {
 });
 
 describe("addition of a new blog", () => {
+  let token;
+  beforeEach(async () => {
+    token = `Bearer ${await createUserToken()}`;
+  });
+
+  test("fails with status code 401 if token is not provided", async () => {
+    const newBlog = {
+      title: "My Website",
+      author: "Richard Dang",
+      url: "http://richarddang.com/",
+      likes: 99,
+    };
+
+    await api.post("/api/blogs").send(newBlog).expect(401);
+  });
+
   test("succeeds with valid data", async () => {
     const newBlog = {
       title: "My Website",
@@ -60,6 +94,7 @@ describe("addition of a new blog", () => {
 
     await api
       .post("/api/blogs")
+      .set({ Authorization: token })
       .send(newBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -80,6 +115,7 @@ describe("addition of a new blog", () => {
 
     const response = await api
       .post("/api/blogs")
+      .set({ Authorization: token })
       .send(blogWithNoLikes)
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -93,16 +129,28 @@ describe("addition of a new blog", () => {
       likes: 99,
     };
 
-    await api.post("/api/blogs").send(blogWithNoTitleAndUrl).expect(400);
+    await api
+      .post("/api/blogs")
+      .set({ Authorization: token })
+      .send(blogWithNoTitleAndUrl)
+      .expect(400);
   });
 });
 
 describe("deletion of a blog", () => {
+  let token;
+  beforeEach(async () => {
+    token = `Bearer ${await createUserToken()}`;
+  });
+
   test("succeeds with status code 204 if id is valid", async () => {
     const blogsBeforeDeletion = await helper.blogsInDb();
     const blogToDelete = blogsBeforeDeletion[0];
 
-    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set({ Authorization: token })
+      .expect(204);
 
     const blogsAfterDeletion = await helper.blogsInDb();
     expect(blogsAfterDeletion).toHaveLength(helper.initialBlogs.length - 1);

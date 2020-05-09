@@ -33,8 +33,15 @@ blogsRouter.post("/", authenticateUser, async (req, res) => {
   res.status(201).json(returnedBlog);
 });
 
-blogsRouter.delete("/:id", async (req, res) => {
+blogsRouter.delete("/:id", authenticateUser, async (req, res) => {
   const id = req.params.id;
+  const user = req.user;
+  const blog = await Blog.findById(id);
+
+  if (!blog || blog.user.toString() !== user._id.toString()) {
+    return res.status(401).end();
+  }
+
   await Blog.findByIdAndRemove(id);
   res.status(204).end();
 });
