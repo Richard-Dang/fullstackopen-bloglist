@@ -16,7 +16,7 @@ mongoose
     useFindAndModify: false,
     useCreateIndex: true,
   })
-  .then(() => console.log("Connceted to MongoDB"))
+  .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.log("Failed to connect to MongoDB: ", err));
 
 app.use(cors());
