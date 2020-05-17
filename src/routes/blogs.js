@@ -17,9 +17,12 @@ blogsRouter.post("/", authenticateUser, async (req, res) => {
   const newBlog = req.body;
   const user = req.user;
 
+  console.log(newBlog);
+
   if (!newBlog.url && !newBlog.title) {
     return res.status(400).send({ error: "url and title are missing" });
-  } else if (!newBlog.likes) {
+  }
+  if (!newBlog.likes) {
     newBlog.likes = 0;
   }
 
