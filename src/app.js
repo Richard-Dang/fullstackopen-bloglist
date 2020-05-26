@@ -7,6 +7,7 @@ const config = require("./utils/config");
 const blogsRouter = require("./routes/blogs");
 const usersRouter = require("./routes/users");
 const loginRouter = require("./routes/login");
+const commentsRouter = require("./routes/comments");
 const errorHandler = require("./middlewares/errorHandler");
 
 mongoose
@@ -25,6 +26,7 @@ app.use(express.json());
 app.use("/api/blogs", blogsRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/login", loginRouter);
+app.use("/api/blogs/:blogId/comments", commentsRouter);
 
 if (process.env.NODE_ENV === "test") {
   const testingRouter = require("./routes/testing");
